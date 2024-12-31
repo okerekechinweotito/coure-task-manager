@@ -1,20 +1,26 @@
-import { useState, useEffect } from "react";
+import { useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 
 export type Task = {
   id: string;
   title: string;
   description: string;
-  priority: string;
-  dueDate: string;
-  status: string;
+  dueDate: string | Date;
+  priority: "High" | "Medium" | "Low";
+  status: "Pending" | "Completed" | "InProgress";
 };
 
+const tasksAtom = atomWithStorage<Task[]>("tasks", []);
+
 const useTasks = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isInitialLoad, setIsInitialLoad] = useState(false);
+  const [tasks, setTasks] = useAtom(tasksAtom);
+
+  const getTaskById = (id: string): Task | undefined => {
+    return tasks.find((task) => task.id === id);
+  };
 
   const addTask = (task: Task) => {
-    setTasks((prevTasks) => [...prevTasks, task]);
+    setTasks((prevTasks) => [task, ...prevTasks]);
   };
 
   const updateTask = (id: string, updatedTask: Task) => {
@@ -27,19 +33,7 @@ const useTasks = () => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
   };
 
-  useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-    setTasks(savedTasks);
-    setIsInitialLoad(true);
-  }, []);
-
-  useEffect(() => {
-    if (isInitialLoad) {
-      localStorage.setItem("tasks", JSON.stringify(tasks));
-    }
-  }, [tasks, isInitialLoad]);
-
-  return { tasks, addTask, updateTask, deleteTask };
+  return { tasks, addTask, updateTask, deleteTask, getTaskById };
 };
 
 export default useTasks;

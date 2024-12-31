@@ -3,30 +3,32 @@
 import useTasks from "@/shared/hooks/useTask";
 import { containerMaxWidth } from "@/shared/lib/constants";
 import FilterSelect from "@/shared/ui/components/filter-select";
-import NewTaskModal from "@/shared/ui/components/new-task-modal";
 import TaskCard from "@/shared/ui/components/task-card";
 import {
-  Button,
   Center,
   Container,
+  For,
   Heading,
   HStack,
   Stack,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import TaskForm from "@/shared/ui/components/task-form/task-form";
+import { Button } from "@/shared/ui/base/chakra/button";
+import { MdAdd } from "react-icons/md";
 
 type Props = {};
 
 export default function Home({}: Props) {
   const {
-    open: isCreateTaskModal,
-    onOpen: openCreateTaskModal,
-    onClose: closeCreateTaskModal,
+    open: isTaskModal,
+    onOpen: openTaskModal,
+    onClose: closeTaskModal,
   } = useDisclosure();
 
-  const { tasks, addTask, deleteTask, updateTask } = useTasks();
+  const { tasks } = useTasks();
+  console.log("tasks:", tasks);
 
   return (
     <Container maxWidth={containerMaxWidth} paddingY={["50px", null, "100px"]}>
@@ -39,20 +41,20 @@ export default function Home({}: Props) {
       <VStack height="auto" width="full" gap={["40px", null, "60px"]}>
         <Stack direction={["column", "row", "row"]} alignItems="end">
           <FilterSelect />
-
-          <NewTaskModal
-            open={isCreateTaskModal}
-            onOpen={openCreateTaskModal}
-            onClose={closeCreateTaskModal}
+          <Button onClick={() => openTaskModal()} width={["300px", "auto"]}>
+            <MdAdd />
+            New Task
+          </Button>
+          <TaskForm
+            open={isTaskModal}
+            onOpen={openTaskModal}
+            onClose={closeTaskModal}
           />
         </Stack>
         <HStack justifyContent="center" flexWrap="wrap" gap={"20px"}>
-          <TaskCard />
-          <TaskCard />
-          <TaskCard />
-          <TaskCard />
-          <TaskCard />
-          <TaskCard />
+          <For each={tasks}>
+            {(task) => <TaskCard key={task.id} task={task} />}
+          </For>
         </HStack>
       </VStack>
     </Container>
