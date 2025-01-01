@@ -42,7 +42,6 @@ const useTasks = () => {
       | "InProgress"
     )[]
   ) => {
-    console.log(" filterOptions:", filterOptions);
     const filteredTasks = tasks.filter((task) => {
       return (
         filterOptions.includes(task.priority) ||

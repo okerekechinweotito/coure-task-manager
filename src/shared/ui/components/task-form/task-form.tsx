@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTitle,
-  DialogTrigger,
 } from "@/shared/ui/base/chakra/dialog";
 import { Field } from "@/shared/ui/base/chakra/field";
 import {
@@ -22,7 +21,6 @@ import { formSchema } from "@/shared/ui/components/task-form/model";
 import { Input, Textarea, useDisclosure, VStack } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { MdAdd } from "react-icons/md";
 import { z } from "zod";
 
 type Props = {
@@ -34,8 +32,8 @@ type Props = {
 
 type FormValues = z.infer<typeof formSchema>;
 
-const TaskForm = ({ open, onOpen, onClose, taskId }: Props) => {
-  const { tasks, addTask, updateTask, getTaskById } = useTasks();
+const TaskForm = ({ open, onClose, taskId }: Props) => {
+  const { addTask, updateTask, getTaskById } = useTasks();
   const taskToEdit = taskId ? getTaskById(taskId) : null;
   const {
     register,
