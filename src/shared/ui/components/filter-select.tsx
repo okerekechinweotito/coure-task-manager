@@ -1,6 +1,13 @@
 "use client";
 
-import { Button, createListCollection, useDisclosure } from "@chakra-ui/react";
+import {
+  Button,
+  Stack,
+  createListCollection,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Field } from "@/shared/ui/base/chakra/field";
 import {
   SelectContent,
   SelectItem,
@@ -9,64 +16,112 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "@/shared/ui/base/chakra/select";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import { MdFilterList } from "react-icons/md";
 
-const FilterSelect = () => {
-  const { open, onClose, onOpen, onToggle } = useDisclosure();
+type FilterSelectProps = {
+  handleTaskFilter: (data: FormValues) => void;
+};
+
+const formSchema = z.object({
+  parameter: z.array(
+    z.enum(["Pending", "Completed", "InProgress", "High", "Medium", "Low"])
+  ),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const FilterSelect = ({ handleTaskFilter }: FilterSelectProps) => {
+  const { open, onClose, onToggle } = useDisclosure();
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const onSubmit = handleSubmit((data) => {
+    handleTaskFilter(data);
+    onClose();
+  });
+
   return (
-    <SelectRoot
-      open={open}
-      onPointerDownOutside={() => onClose()}
-      positioning={{ placement: "top", flip: true }}
-      collection={frameworks}
-      size="md"
-      width={["300px", "350px"]}
-      multiple>
-      <SelectTrigger onClick={() => onToggle()}>
-        <SelectValueText
-          fontWeight="bold"
-          placeholder="Sort By Priority and Status"
-        />
-      </SelectTrigger>
-      <SelectContent>
-        {categories.map((category) => (
-          <SelectItemGroup key={category.group} label={category.group}>
-            {category.items.map((item) => (
-              <SelectItem
-                fontWeight="light"
-                cursor="pointer"
-                item={item}
-                key={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectItemGroup>
-        ))}
-        <Button>
-          <MdFilterList />
-          Filter
-        </Button>
-      </SelectContent>
-    </SelectRoot>
+    <form>
+      <Stack gap="4" align="flex-start">
+        <Field
+          invalid={!!errors.parameter}
+          errorText={errors.parameter?.message}>
+          <Controller
+            control={control}
+            name="parameter"
+            render={({ field }) => (
+              <SelectRoot
+                open={open}
+                size="md"
+                width={["300px", "350px"]}
+                name={field.name}
+                value={field.value}
+                onPointerDownOutside={() => onClose()}
+                onValueChange={({ value }) => field.onChange(value)}
+                onInteractOutside={() => field.onBlur()}
+                collection={parameters}
+                multiple>
+                <SelectTrigger onClick={() => onToggle()}>
+                  <SelectValueText
+                    fontWeight="bold"
+                    placeholder="Sort By Priority and Status"
+                  />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItemGroup
+                      key={category.group}
+                      label={category.group}>
+                      {category.items.map((item) => (
+                        <SelectItem
+                          fontWeight="light"
+                          cursor="pointer"
+                          item={item}
+                          key={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectItemGroup>
+                  ))}
+
+                  <Button onClick={() => onSubmit()}>
+                    <MdFilterList />
+                    Filter
+                  </Button>
+                </SelectContent>
+              </SelectRoot>
+            )}
+          />
+        </Field>
+      </Stack>
+    </form>
   );
 };
 
-const frameworks = createListCollection({
+const parameters = createListCollection({
   items: [
     { label: "High", value: "High", group: "Priority" },
     { label: "Medium", value: "Medium", group: "Priority" },
     { label: "Low", value: "Low", group: "Priority" },
     {
-      label: "pending",
-      value: "pending",
+      label: "Pending",
+      value: "Pending",
       group: "Status",
     },
-    { label: "in progress", value: "in progress", group: "Status" },
-    { label: "completed", value: "completed", group: "Status" },
+    { label: "InProgress", value: "InProgress", group: "Status" },
+    { label: "Completed", value: "Completed", group: "Status" },
   ],
 });
 
-const categories = frameworks.items.reduce((acc, item) => {
+const categories = parameters.items.reduce((acc, item) => {
   const group = acc.find((group) => group.group === item.group);
   if (group) {
     group.items.push(item);
@@ -74,6 +129,6 @@ const categories = frameworks.items.reduce((acc, item) => {
     acc.push({ group: item.group, items: [item] });
   }
   return acc;
-}, [] as { group: string; items: (typeof frameworks)["items"] }[]);
+}, [] as { group: string; items: (typeof parameters)["items"] }[]);
 
 export default FilterSelect;

@@ -17,18 +17,24 @@ import {
 import TaskForm from "@/shared/ui/components/task-form/task-form";
 import { Button } from "@/shared/ui/base/chakra/button";
 import { MdAdd } from "react-icons/md";
+import { atom, useAtom } from "jotai";
 
-type Props = {};
+const sortedTasksAtom = atom<any[]>([]);
 
-export default function Home({}: Props) {
+export default function Home() {
   const {
     open: isTaskModal,
     onOpen: openTaskModal,
     onClose: closeTaskModal,
   } = useDisclosure();
 
-  const { tasks } = useTasks();
-  console.log("tasks:", tasks);
+  const { tasks, filterTasks } = useTasks();
+  const [sortedTasks, setSortedTasks] = useAtom(sortedTasksAtom);
+
+  const handleTaskFilter = (filterOptions: any) => {
+    const sortedTasks = filterTasks(filterOptions.parameter);
+    setSortedTasks(sortedTasks);
+  };
 
   return (
     <Container maxWidth={containerMaxWidth} paddingY={["50px", null, "100px"]}>
@@ -40,7 +46,7 @@ export default function Home({}: Props) {
 
       <VStack height="auto" width="full" gap={["40px", null, "60px"]}>
         <Stack direction={["column", "row", "row"]} alignItems="end">
-          <FilterSelect />
+          <FilterSelect handleTaskFilter={handleTaskFilter} />
           <Button onClick={() => openTaskModal()} width={["300px", "auto"]}>
             <MdAdd />
             New Task
@@ -52,7 +58,7 @@ export default function Home({}: Props) {
           />
         </Stack>
         <HStack justifyContent="center" flexWrap="wrap" gap={"20px"}>
-          <For each={tasks}>
+          <For each={sortedTasks.length > 0 ? sortedTasks : tasks}>
             {(task) => <TaskCard key={task.id} task={task} />}
           </For>
         </HStack>

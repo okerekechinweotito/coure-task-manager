@@ -32,8 +32,27 @@ const useTasks = () => {
   const deleteTask = (id: string) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
   };
+  const filterTasks = (
+    filterOptions: (
+      | "High"
+      | "Medium"
+      | "Low"
+      | "Pending"
+      | "Completed"
+      | "InProgress"
+    )[]
+  ) => {
+    console.log(" filterOptions:", filterOptions);
+    const filteredTasks = tasks.filter((task) => {
+      return (
+        filterOptions.includes(task.priority) ||
+        filterOptions.includes(task.status)
+      );
+    });
+    return filteredTasks;
+  };
 
-  return { tasks, addTask, updateTask, deleteTask, getTaskById };
+  return { tasks, addTask, updateTask, deleteTask, filterTasks, getTaskById };
 };
 
 export default useTasks;
