@@ -22,9 +22,10 @@ To run tests, Run
 - Form Handling - React Hook Form
 - Icon Pack - React Icons
 
-## Project Structure
+## Project Structure and Flow
+
+- 'modules/home' is the main entry point of the project. CRUD operations and filtering are all done inside useTask Hook. filter-select component handles UI and FORM used for filtering. task-card handles UI for individual task card. task-form handles UI and FORM for creating and updating Tasks
 
 - Next 15 new App directory was used, the 'app' folder is used solely for routing, layout and providers
-- 'modules/home' is the main entry point of the project
 - 'shared' folder is where hooks and UI components are stored
 - `__tests__` holds unit tests for useTask hook; which covers CRUD operations + filtering

@@ -5,8 +5,12 @@ import { Tag } from "@/shared/ui/base/chakra/tag";
 import { Status } from "@/shared/ui/base/chakra/status";
 import useTasks from "@/shared/hooks/useTask";
 import TaskForm from "@/shared/ui/components/task-form/task-form";
+import { useAtomValue } from "jotai";
+import { selectedFiltersAtom } from "@/shared/ui/components/filter-select";
 
 const TaskCard = (data: any) => {
+  const selectedFilters = useAtomValue(selectedFiltersAtom);
+
   const {
     open: isTaskModal,
     onOpen: openTaskModal,
@@ -25,6 +29,13 @@ const TaskCard = (data: any) => {
     Completed: "success",
     InProgress: "info",
     Pending: "warning",
+  };
+
+  const handleDeleteTask = (id: any) => {
+    deleteTask(id);
+    if (selectedFilters.length > 0) {
+      window.location.reload();
+    }
   };
   return (
     <Card.Root width={["300px", null, "320px"]} boxShadow="md">
@@ -67,7 +78,7 @@ const TaskCard = (data: any) => {
           Edit
         </Button>
         <Button
-          onClick={() => deleteTask(task.id)}
+          onClick={() => handleDeleteTask(task.id)}
           variant="subtle"
           colorPalette="red"
           flex="1">

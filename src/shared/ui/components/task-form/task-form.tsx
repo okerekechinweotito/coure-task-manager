@@ -17,11 +17,14 @@ import {
   NativeSelectField,
   NativeSelectRoot,
 } from "@/shared/ui/base/chakra/native-select";
-import { sortedTasksAtom } from "@/shared/ui/components/filter-select";
+import {
+  selectedFiltersAtom,
+  sortedTasksAtom,
+} from "@/shared/ui/components/filter-select";
 import { formSchema } from "@/shared/ui/components/task-form/model";
 import { Input, Textarea, useDisclosure, VStack } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -36,7 +39,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 const TaskForm = ({ open, onClose, taskId }: Props) => {
   const setSortedTasks = useSetAtom(sortedTasksAtom);
-  const { addTask, updateTask, getTaskById } = useTasks();
+  const selectedFilters = useAtomValue(selectedFiltersAtom);
+  const { addTask, updateTask, getTaskById, filterTasks } = useTasks();
   const taskToEdit = taskId ? getTaskById(taskId) : null;
   const {
     register,
@@ -62,101 +66,118 @@ const TaskForm = ({ open, onClose, taskId }: Props) => {
 
   const onSubmit = handleSubmit((data) => {
     if (taskToEdit) {
-      setSortedTasks([]);
       const updatedTask: Task = {
         ...taskToEdit,
         ...data,
       };
       updateTask(taskId, updatedTask);
+
+      if (selectedFilters.length > 0) {
+        const newSortedTasks = filterTasks(selectedFilters);
+        setSortedTasks(newSortedTasks);
+        window.location.reload();
+      } else {
+        setSortedTasks(null);
+      }
+
       onClose();
       return;
     }
+
     onLoading();
     const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const task = { ...data, id: id };
     addTask(task);
+
+    if (selectedFilters.length > 0) {
+      const newSortedTasks = filterTasks(selectedFilters);
+      setSortedTasks(newSortedTasks);
+    } else {
+      setSortedTasks(null);
+    }
+
     reset();
     stopLoading();
     onClose();
   });
 
-  return (
-    <DialogRoot size={["xs", null, "lg"]} lazyMount open={open}>
-      <DialogContent>
-        <form onSubmit={onSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create New Task</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <VStack gap="20px">
-              <Field
-                label="Title"
-                invalid={!!errors.title}
-                errorText={errors.title?.message}>
-                <Input placeholder="Task Title" {...register("title")} />
-              </Field>
-              <Field
-                label="Description"
-                invalid={!!errors.description}
-                errorText={errors.description?.message}>
-                <Textarea
-                  placeholder="Task Description"
-                  {...register("description")}
-                />
-              </Field>
-              <Field
-                label="Due Date"
-                invalid={!!errors.dueDate}
-                errorText={errors.dueDate?.message}>
-                <Input {...register("dueDate")} type="date" />
-              </Field>
+   return (
+     <DialogRoot size={["xs", null, "lg"]} lazyMount open={open}>
+       <DialogContent>
+         <form id="task-form" onSubmit={onSubmit}>
+           <DialogHeader>
+             <DialogTitle>Create New Task</DialogTitle>
+           </DialogHeader>
+           <DialogBody>
+             <VStack gap="20px">
+               <Field
+                 label="Title"
+                 invalid={!!errors.title}
+                 errorText={errors.title?.message}>
+                 <Input placeholder="Task Title" {...register("title")} />
+               </Field>
+               <Field
+                 label="Description"
+                 invalid={!!errors.description}
+                 errorText={errors.description?.message}>
+                 <Textarea
+                   placeholder="Task Description"
+                   {...register("description")}
+                 />
+               </Field>
+               <Field
+                 label="Due Date"
+                 invalid={!!errors.dueDate}
+                 errorText={errors.dueDate?.message}>
+                 <Input {...register("dueDate")} type="date" />
+               </Field>
 
-              <Field
-                label="Priority"
-                invalid={!!errors.priority}
-                errorText={errors.priority?.message}>
-                <NativeSelectRoot>
-                  <NativeSelectField
-                    placeholder="Priority"
-                    {...register("priority")}>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </NativeSelectField>
-                </NativeSelectRoot>
-              </Field>
+               <Field
+                 label="Priority"
+                 invalid={!!errors.priority}
+                 errorText={errors.priority?.message}>
+                 <NativeSelectRoot>
+                   <NativeSelectField
+                     placeholder="Priority"
+                     {...register("priority")}>
+                     <option value="High">High</option>
+                     <option value="Medium">Medium</option>
+                     <option value="Low">Low</option>
+                   </NativeSelectField>
+                 </NativeSelectRoot>
+               </Field>
 
-              <Field
-                label="Status"
-                invalid={!!errors.status}
-                errorText={errors.status?.message}>
-                <NativeSelectRoot>
-                  <NativeSelectField
-                    placeholder="Status"
-                    {...register("status")}>
-                    <option value="Pending">Pending</option>
-                    <option value="InProgress">InProgress</option>
-                    <option value="Completed">Completed</option>
-                  </NativeSelectField>
-                </NativeSelectRoot>
-              </Field>
-            </VStack>
-          </DialogBody>
-          <DialogFooter>
-            <DialogActionTrigger asChild>
-              <Button onClick={() => onClose()} variant="outline">
-                Cancel
-              </Button>
-            </DialogActionTrigger>
-            <Button loading={loading} type="submit">
-              Save
-            </Button>
-          </DialogFooter>
-          <DialogCloseTrigger onClick={() => onClose()} />
-        </form>
-      </DialogContent>
-    </DialogRoot>
-  );
+               <Field
+                 label="Status"
+                 invalid={!!errors.status}
+                 errorText={errors.status?.message}>
+                 <NativeSelectRoot>
+                   <NativeSelectField
+                     placeholder="Status"
+                     {...register("status")}>
+                     <option value="Pending">Pending</option>
+                     <option value="InProgress">InProgress</option>
+                     <option value="Completed">Completed</option>
+                   </NativeSelectField>
+                 </NativeSelectRoot>
+               </Field>
+             </VStack>
+           </DialogBody>
+           <DialogFooter>
+             <DialogActionTrigger asChild>
+               <Button onClick={() => onClose()} variant="outline">
+                 Cancel
+               </Button>
+             </DialogActionTrigger>
+             <Button form="task-form" loading={loading} type="submit">
+               Save
+             </Button>
+           </DialogFooter>
+           <DialogCloseTrigger onClick={() => onClose()} />
+         </form>
+       </DialogContent>
+     </DialogRoot>
+   );
 };
 
 export default TaskForm;

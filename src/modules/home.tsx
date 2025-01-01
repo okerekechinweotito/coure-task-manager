@@ -30,44 +30,52 @@ export default function Home() {
   } = useDisclosure();
 
   const { tasks } = useTasks();
+const tasksToDisplay = sortedTasks === null ? tasks : sortedTasks;
 
-  return (
-    <Container maxWidth={containerMaxWidth} paddingY={["50px", null, "100px"]}>
-      <Center marginBottom={["50px", null, "80px"]}>
-        <Heading size={["lg", null, "xl"]}>
-          COURE TASK MANAGER APPLICATION
+return (
+  <Container maxWidth={containerMaxWidth} paddingY={["50px", null, "100px"]}>
+    <Center marginBottom={["50px", null, "80px"]}>
+      <Heading size={["lg", null, "xl"]}>
+        COURE TASK MANAGER APPLICATION
+      </Heading>
+    </Center>
+
+    <VStack height="auto" width="full" gap={["40px", null, "60px"]}>
+      <Stack direction={["column", "row", "row"]} alignItems="end">
+        <FilterSelect />
+        <Button onClick={() => openTaskModal()} width={["300px", "auto"]}>
+          <MdAdd />
+          New Task
+        </Button>
+        <TaskForm
+          open={isTaskModal}
+          onOpen={openTaskModal}
+          onClose={closeTaskModal}
+        />
+      </Stack>
+
+      <HStack justifyContent="center" flexWrap="wrap" gap="20px">
+        <For each={tasksToDisplay}>
+          {(task) => <TaskCard key={task.id} task={task} />}
+        </For>
+      </HStack>
+
+      {
+        <Heading
+          display={
+            tasks.length === 0 ||
+            (sortedTasks !== null && sortedTasks.length === 0)
+              ? "block"
+              : "none"
+          }
+          color="grey"
+          size={["lg", null, "xl"]}>
+          {tasks.length === 0
+            ? "CREATE A NEW TASK TO START"
+            : "NO TASKS MATCH THE SELECTED FILTERS"}
         </Heading>
-      </Center>
-
-      <VStack height="auto" width="full" gap={["40px", null, "60px"]}>
-        <Stack direction={["column", "row", "row"]} alignItems="end">
-          <FilterSelect />
-          <Button onClick={() => openTaskModal()} width={["300px", "auto"]}>
-            <MdAdd />
-            New Task
-          </Button>
-          <TaskForm
-            open={isTaskModal}
-            onOpen={openTaskModal}
-            onClose={closeTaskModal}
-          />
-        </Stack>
-
-        <HStack justifyContent="center" flexWrap="wrap" gap={"20px"}>
-          <For each={sortedTasks.length > 0 ? sortedTasks : tasks}>
-            {(task) => <TaskCard key={task.id} task={task} />}
-          </For>
-        </HStack>
-
-        {
-          <Heading
-            display={tasks.length > 0 ? "none" : "block"}
-            color="grey"
-            size={["lg", null, "xl"]}>
-            CREATE A NEW TASK TO START
-          </Heading>
-        }
-      </VStack>
-    </Container>
-  );
+      }
+    </VStack>
+  </Container>
+);
 }

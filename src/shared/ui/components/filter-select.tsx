@@ -22,7 +22,8 @@ import { MdFilterList } from "react-icons/md";
 import { atom, useSetAtom } from "jotai";
 import useTasks from "@/shared/hooks/useTask";
 
-export const sortedTasksAtom = atom<any[]>([]);
+export const selectedFiltersAtom = atom<any[]>([]);
+export const sortedTasksAtom = atom<any[] | null>(null);
 
 const formSchema = z.object({
   parameter: z.array(
@@ -34,7 +35,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 const FilterSelect = () => {
   const setSortedTasks = useSetAtom(sortedTasksAtom);
-  const { filterTasks } = useTasks();
+  const setSelectedFilters = useSetAtom(selectedFiltersAtom);
+  const { filterTasks, tasks } = useTasks();
 
   const { open, onClose, onToggle } = useDisclosure();
   const {
@@ -46,13 +48,20 @@ const FilterSelect = () => {
   });
 
   const onSubmit = handleSubmit((data) => {
-    const sortedTasks = filterTasks(data.parameter);
-    setSortedTasks(sortedTasks);
+    const filters = data.parameter;
+    setSelectedFilters(filters); 
+
+    if (filters.length === 0) {
+      setSortedTasks(null);
+    } else {
+      const sortedTasks = filterTasks(filters);
+      setSortedTasks(sortedTasks);
+    }
     onClose();
   });
 
   return (
-    <form>
+    <form id="filter-form">
       <Stack gap="4" align="flex-start">
         <Field
           invalid={!!errors.parameter}
@@ -96,7 +105,7 @@ const FilterSelect = () => {
                     </SelectItemGroup>
                   ))}
 
-                  <Button onClick={() => onSubmit()}>
+                  <Button form="filter-form" onClick={() => onSubmit()}>
                     <MdFilterList />
                     Filter
                   </Button>
