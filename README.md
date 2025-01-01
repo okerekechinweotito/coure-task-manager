@@ -27,6 +27,4 @@ To run tests, Run
 - Next 15 new App directory was used, the 'app' folder is used solely for routing, layout and providers
 - 'modules/home' is the main entry point of the project
 - 'shared' folder is where hooks and UI components are stored
-- '__tests__' holds unit tests for useTask hook; which covers CRUD operations + filtering
-
-
+- `__tests__` holds unit tests for useTask hook; which covers CRUD operations + filtering

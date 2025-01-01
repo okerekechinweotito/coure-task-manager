@@ -17,9 +17,11 @@ import {
   NativeSelectField,
   NativeSelectRoot,
 } from "@/shared/ui/base/chakra/native-select";
+import { sortedTasksAtom } from "@/shared/ui/components/filter-select";
 import { formSchema } from "@/shared/ui/components/task-form/model";
 import { Input, Textarea, useDisclosure, VStack } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSetAtom } from "jotai";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -33,6 +35,7 @@ type Props = {
 type FormValues = z.infer<typeof formSchema>;
 
 const TaskForm = ({ open, onClose, taskId }: Props) => {
+  const setSortedTasks = useSetAtom(sortedTasksAtom);
   const { addTask, updateTask, getTaskById } = useTasks();
   const taskToEdit = taskId ? getTaskById(taskId) : null;
   const {
@@ -59,6 +62,7 @@ const TaskForm = ({ open, onClose, taskId }: Props) => {
 
   const onSubmit = handleSubmit((data) => {
     if (taskToEdit) {
+      setSortedTasks([]);
       const updatedTask: Task = {
         ...taskToEdit,
         ...data,

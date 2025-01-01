@@ -19,10 +19,10 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { MdFilterList } from "react-icons/md";
+import { atom, useSetAtom } from "jotai";
+import useTasks from "@/shared/hooks/useTask";
 
-type FilterSelectProps = {
-  handleTaskFilter: (data: FormValues) => void;
-};
+export const sortedTasksAtom = atom<any[]>([]);
 
 const formSchema = z.object({
   parameter: z.array(
@@ -32,7 +32,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const FilterSelect = ({ handleTaskFilter }: FilterSelectProps) => {
+const FilterSelect = () => {
+  const setSortedTasks = useSetAtom(sortedTasksAtom);
+  const { filterTasks } = useTasks();
+
   const { open, onClose, onToggle } = useDisclosure();
   const {
     handleSubmit,
@@ -43,7 +46,8 @@ const FilterSelect = ({ handleTaskFilter }: FilterSelectProps) => {
   });
 
   const onSubmit = handleSubmit((data) => {
-    handleTaskFilter(data);
+    const sortedTasks = filterTasks(data.parameter);
+    setSortedTasks(sortedTasks);
     onClose();
   });
 
