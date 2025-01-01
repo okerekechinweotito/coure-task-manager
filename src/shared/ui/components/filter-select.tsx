@@ -84,7 +84,7 @@ const FilterSelect = () => {
                 <SelectTrigger onClick={() => onToggle()}>
                   <SelectValueText
                     fontWeight="bold"
-                    placeholder="Sort By Priority and Status"
+                    placeholder="Sort By Priority and/or Status"
                   />
                 </SelectTrigger>
 
