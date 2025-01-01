@@ -24,7 +24,7 @@ To run tests, Run
 
 ## Project Structure and Flow
 
-- 'modules/home' is the main entry point of the project. CRUD operations and filtering are all done inside useTask Hook. filter-select component handles UI and FORM used for filtering. task-card handles UI for individual task card. task-form handles UI and FORM for creating and updating Tasks
+- 'modules/home' is the main entry point of the project. CRUD operations and filtering are all done inside useTask Hook. filter-select component handles UI and FORM used for filtering. task-card handles UI for individual task card. task-form handles UI and FORM for creating and updating Tasks. I used Jotai's atomWithStorage which uses local-storage under the hood to handle persisting Task Data.
 
 - Next 15 new App directory was used, the 'app' folder is used solely for routing, layout and providers
 - 'shared' folder is where hooks and UI components are stored
